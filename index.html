@@ -3,24 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FC-Chuyên Bạc Liêu - Zalo Fixed</title>
+    <title>FC-Chuyên Bạc Liêu - Full List Fix</title>
     <style>
-        body { margin: 0; background: #050505; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
-        #game-container { position: relative; width: 100vw; max-width: 900px; aspect-ratio: 3/2; border: 3px solid #fff; background: #1b5e20; }
+        body { margin: 0; background: #000; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
+        #game-container { position: relative; width: 100vw; max-width: 900px; aspect-ratio: 3/2; border: 2px solid #fff; background: #1b5e20; }
         canvas { display: block; width: 100%; height: 100%; touch-action: none; }
         
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 10px; box-sizing: border-box; }
-        .game-title { color: #f1c40f; font-size: 28px; margin: 0; text-shadow: 2px 2px #c0392b; }
+        /* Overlay UI - Fix danh sách */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.97); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; z-index: 100; padding: 5px; box-sizing: border-box; }
+        .game-title { color: #f1c40f; font-size: 22px; margin: 5px 0 0 0; text-shadow: 2px 2px #c0392b; }
         
-        .selection-area { display: flex; gap: 15px; width: 95%; height: 55%; margin-top: 10px; }
-        .list-container { background: #1a1a1a; padding: 10px; border-radius: 10px; width: 50%; border: 1px solid #444; display: flex; flex-direction: column; }
-        .player-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; border: 1px solid #333; background: #000; }
-        .player-item { padding: 12px; border-bottom: 1px solid #222; cursor: pointer; font-size: 0.9rem; }
-        .selected { background: #27ae60 !important; font-weight: bold; }
+        .selection-area { display: flex; gap: 10px; width: 98%; height: 60%; margin-top: 5px; }
+        .list-container { background: #1a1a1a; padding: 5px; border-radius: 8px; width: 50%; border: 1px solid #444; display: flex; flex-direction: column; overflow: hidden; }
+        .list-container h4 { margin: 2px 0; color:#f1c40f; text-align:center; font-size: 14px; }
         
-        button { padding: 12px 40px; font-size: 18px; background: #c0392b; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        /* Fix cuộn danh sách mượt trên điện thoại */
+        .player-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; border: 1px solid #333; background: #000; -webkit-overflow-scrolling: touch; }
+        .player-item { padding: 12px 8px; border-bottom: 1px solid #222; cursor: pointer; font-size: 13px; line-height: 1.2; }
+        .selected { background: #27ae60 !important; font-weight: bold; color: white; }
+        
+        .how-to-play { background: rgba(241, 196, 15, 0.1); padding: 5px; border-radius: 5px; margin: 5px; font-size: 11px; border: 1px solid #f1c40f; width: 95%; text-align: center; }
+        button { padding: 10px 40px; font-size: 18px; background: #c0392b; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; margin: 5px 0; }
         button:disabled { background: #555; opacity: 0.5; }
-        #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-around; font-size: 18px; font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none; z-index: 10; }
+        
+        #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-around; font-size: 16px; font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none; z-index: 10; }
     </style>
 </head>
 <body>
@@ -32,27 +38,27 @@
     </div>
 
     <div id="intro" class="overlay">
-        <h1 class="game-title">GAME SÚT PHẠT ĐỀN</h1>
-        <h3 style="margin:5px;">FC-CHUYÊN BẠC LIÊU</h3>
-        <p style="background:#333; padding:5px; border-radius:5px; font-size:12px;">Chạm 1 lần để NGẮM • Chạm 2 lần nhanh để SÚT</p>
+        <h2 class="game-title">GAME SÚT PHẠT ĐỀN</h2>
+        <h4 style="margin:2px;">FC-CHUYÊN BẠC LIÊU</h4>
         
         <div class="selection-area">
             <div class="list-container">
-                <h4 style="margin:5px; color:#f1c40f; text-align:center;">THỦ MÔN</h4>
+                <h4>THỦ MÔN (Chọn 1)</h4>
                 <ul id="gk-list" class="player-list"></ul>
             </div>
             <div class="list-container">
-                <h4 style="margin:5px; color:#3498db; text-align:center;">CẦU THỦ SÚT (5)</h4>
+                <h4>SÚT PHẠT (Chọn 5)</h4>
                 <ul id="st-list" class="player-list"></ul>
-                <p id="counter" style="text-align:center; margin:2px; font-size:12px;">Đã chọn: 0/5</p>
             </div>
         </div>
-        <button id="start-btn" onclick="startGame()" disabled>RA SÂN</button>
+        <p id="counter" style="margin: 2px; font-size: 12px; color: #3498db;">Đã chọn: 0/5</p>
+        <div class="how-to-play">Chạm 1 lần để NGẮM • Chạm 2 lần nhanh để SÚT</div>
+        <button id="start-btn" onclick="startGame()" disabled>BẮT ĐẦU</button>
     </div>
 
-    <div id="summary" class="overlay" style="display: none;">
+    <div id="summary" class="overlay" style="display: none; justify-content: center;">
         <h1 style="color:#f1c40f;">KẾT THÚC</h1>
-        <div id="rank-info" style="text-align:center; font-size: 20px;"></div>
+        <div id="rank-info" style="text-align:center; font-size: 18px;"></div>
         <button onclick="location.reload()">CHƠI LẠI</button>
     </div>
 
@@ -72,7 +78,7 @@ let ball = { x: 450, y: 520, r: 15, vx: 0, vy: 0, s: 1, trail: [] };
 let gk = { x: 450, y: 175, dx: 0, dy: 0, state: 'IDLE' };
 let strikerAnim = { state: 'IDLE' };
 let feedback = { text: "", opacity: 0, color: "" };
-let clickCount = 0, lastClickTime = 0;
+let lastClickTime = 0;
 
 function initLists() {
     const gkUl = document.getElementById('gk-list');
@@ -84,7 +90,7 @@ function initLists() {
     const stUl = document.getElementById('st-list');
     stsData.forEach(name => {
         const li = document.createElement('li'); li.className = 'player-item'; li.innerText = name;
-        li.onclick = () => { if(selectedStrikers.length < 5 && !selectedStrikers.includes(name)){ selectedStrikers.push(name); li.classList.add('selected'); document.getElementById('counter').innerText = `Đã chọn: ${selectedStrikers.length}/5`; check(); } };
+        li.onclick = () => { if(!selectedStrikers.includes(name) && selectedStrikers.length < 5){ selectedStrikers.push(name); li.classList.add('selected'); document.getElementById('counter').innerText = `Đã chọn: ${selectedStrikers.length}/5`; check(); } };
         stUl.appendChild(li);
     });
 }
@@ -96,23 +102,20 @@ function drawPerson(x, y, color, label, isGK, dive = {x:0, y:0}, state = 'IDLE')
     ctx.translate(x + dive.x, y + dive.y + idle);
     if(state === 'LEFT') ctx.rotate(-Math.PI/4.5);
     if(state === 'RIGHT') ctx.rotate(Math.PI/4.5);
-    
     ctx.fillStyle = "#111"; ctx.fillRect(-15, -85, 30, 12);
     ctx.fillStyle = "#ffdbac"; ctx.beginPath(); ctx.arc(0, -68, 18, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = color; ctx.fillRect(-25, -50, 50, 60);
     ctx.fillStyle = "white"; ctx.font = "bold 20px Arial"; ctx.textAlign = "center";
     ctx.fillText(label.match(/\d+/)[0], 0, -15);
-    
     ctx.strokeStyle = "#ffdbac"; ctx.lineWidth = 10; ctx.beginPath();
-    let armY = (isGK && state !== 'IDLE') ? -110 : -20;
+    let armY = (isGK && state !== 'IDLE') ? -100 : -20;
     ctx.moveTo(-25, -40); ctx.lineTo(-40, armY); ctx.moveTo(25, -40); ctx.lineTo(40, armY); ctx.stroke();
-    
     if (!isGK && state === 'KICK') {
         ctx.fillStyle = "#111"; ctx.fillRect(-20, 10, 15, 25);
         ctx.save(); ctx.translate(12, 10); ctx.rotate(-Math.PI/2.5); ctx.fillRect(0, 0, 15, 30); ctx.restore();
     } else { ctx.fillStyle = "#111"; ctx.fillRect(-20, 10, 15, 25); ctx.fillRect(5, 10, 15, 25); }
     ctx.restore();
-    ctx.save(); ctx.translate(x + dive.x, y + dive.y); ctx.fillStyle = "white"; ctx.font = "bold 16px Arial"; ctx.textAlign = "center";
+    ctx.save(); ctx.translate(x + dive.x, y + dive.y); ctx.fillStyle = "white"; ctx.font = "bold 15px Arial"; ctx.textAlign = "center";
     ctx.fillText(label.split('(')[0].trim(), 0, 65); ctx.restore();
 }
 
@@ -141,7 +144,6 @@ function update() {
         if(gk.state === 'LEFT') gk.dx -= 9; if(gk.state === 'RIGHT') gk.dx += 9;
         if(ball.y < 200) checkScore();
     }
-
     ball.trail.forEach((t, i) => { ctx.beginPath(); ctx.fillStyle = `rgba(255,255,255,${i/12})`; ctx.arc(t.x, t.y, ball.r * ball.s, 0, Math.PI*2); ctx.fill(); });
     ctx.save(); ctx.translate(ball.x, ball.y); ctx.scale(ball.s, ball.s); ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(0, 0, ball.r, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = "black"; ctx.stroke(); ctx.restore();
 
@@ -165,31 +167,23 @@ function checkScore() {
     }, 1700);
 }
 
-// XỬ LÝ ĐIỀU KHIỂN CHỐNG LỖI TRÊN ZALO
 function handleInput(e) {
     if(gameState !== 'PLAYING' || ball.vy !== 0) return;
     e.preventDefault();
-    
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
     const inputX = (clientX - rect.left) * (canvas.width / rect.width);
     const inputY = (clientY - rect.top) * (canvas.height / rect.height);
-    
     let now = Date.now();
     if (now - lastClickTime < 350) {
-        // DOUBLE CLICK: SÚT
         strikerAnim.state = 'KICK';
         setTimeout(() => {
             const dx = aimPos.x - ball.x, dy = aimPos.y - ball.y, dist = Math.sqrt(dx*dx + dy*dy);
             ball.vx = (dx/dist) * 17.5; ball.vy = (dy/dist) * 17.5;
             const r = Math.random(); gk.state = r < 0.38 ? 'LEFT' : (r < 0.76 ? 'RIGHT' : 'IDLE');
         }, 120);
-    } else {
-        // SINGLE CLICK: NGẮM
-        aimPos.x = inputX; aimPos.y = inputY;
-    }
+    } else { aimPos.x = inputX; aimPos.y = inputY; }
     lastClickTime = now;
 }
 

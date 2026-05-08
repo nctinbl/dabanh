@@ -3,61 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FC-Chuyên Bạc Liêu - Hoàn Thiện</title>
+    <title>FC-Chuyên Bạc Liêu - Zalo Fixed</title>
     <style>
-        body { margin: 0; background: #050505; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; touch-action: manipulation; }
-        #game-container { position: relative; width: 900px; height: 600px; border: 4px solid #fff; background: #1b5e20; max-width: 100vw; max-height: 100vh; }
-        canvas { display: block; width: 100%; height: 100%; }
+        body { margin: 0; background: #050505; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
+        #game-container { position: relative; width: 100vw; max-width: 900px; aspect-ratio: 3/2; border: 3px solid #fff; background: #1b5e20; }
+        canvas { display: block; width: 100%; height: 100%; touch-action: none; }
         
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 10px; box-sizing: border-box; }
-        .game-title-main { color: #f1c40f; font-size: 35px; margin: 0; text-shadow: 2px 2px #c0392b; text-align: center; }
+        .game-title { color: #f1c40f; font-size: 28px; margin: 0; text-shadow: 2px 2px #c0392b; }
         
-        .selection-area { display: flex; gap: 20px; width: 95%; height: 60%; margin-top: 15px; }
-        .list-container { background: #1a1a1a; padding: 10px; border-radius: 12px; width: 50%; border: 1px solid #444; display: flex; flex-direction: column; }
-        .list-container h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #f1c40f; text-align: center; }
-        
+        .selection-area { display: flex; gap: 15px; width: 95%; height: 55%; margin-top: 10px; }
+        .list-container { background: #1a1a1a; padding: 10px; border-radius: 10px; width: 50%; border: 1px solid #444; display: flex; flex-direction: column; }
         .player-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; border: 1px solid #333; background: #000; }
-        .player-item { padding: 12px; border-bottom: 1px solid #222; cursor: pointer; font-size: 0.95rem; text-align: left; }
+        .player-item { padding: 12px; border-bottom: 1px solid #222; cursor: pointer; font-size: 0.9rem; }
         .selected { background: #27ae60 !important; font-weight: bold; }
         
-        .how-to-play { background: rgba(241, 196, 15, 0.1); padding: 10px; border-radius: 8px; margin: 10px; font-size: 14px; border: 1px solid #f1c40f; width: 90%; text-align: center; }
-        button { padding: 15px 50px; font-size: 20px; background: #c0392b; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; margin-top: 15px; }
-        button:disabled { background: #555; opacity: 0.5; cursor: not-allowed; }
-        
-        #hud { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-around; font-size: 22px; font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none; z-index: 10; }
+        button { padding: 12px 40px; font-size: 18px; background: #c0392b; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:disabled { background: #555; opacity: 0.5; }
+        #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-around; font-size: 18px; font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none; z-index: 10; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <div id="hud">
-        <div id="hud-turn">Lượt sút: 0/5</div>
-        <div id="hud-score">Bàn thắng: 0</div>
+        <div id="hud-turn">Lượt: 0/5</div>
+        <div id="hud-score">Vào: 0</div>
     </div>
 
     <div id="intro" class="overlay">
-        <h1 class="game-title-main">GAME SÚT PHẠT ĐỀN</h1>
-        <h2 style="margin: 5px 0;">FC-CHUYÊN BẠC LIÊU</h2>
-        <div class="how-to-play">
-            <b>CÁCH CHƠI:</b> Nháy 1 lần để <b>NGẮM</b> • Nháy nhanh 2 lần để <b>SÚT</b>
-        </div>
+        <h1 class="game-title">GAME SÚT PHẠT ĐỀN</h1>
+        <h3 style="margin:5px;">FC-CHUYÊN BẠC LIÊU</h3>
+        <p style="background:#333; padding:5px; border-radius:5px; font-size:12px;">Chạm 1 lần để NGẮM • Chạm 2 lần nhanh để SÚT</p>
+        
         <div class="selection-area">
             <div class="list-container">
-                <h3>THỦ MÔN (Chọn 1)</h3>
+                <h4 style="margin:5px; color:#f1c40f; text-align:center;">THỦ MÔN</h4>
                 <ul id="gk-list" class="player-list"></ul>
             </div>
             <div class="list-container">
-                <h3>CẦU THỦ SÚT (Chọn 5)</h3>
+                <h4 style="margin:5px; color:#3498db; text-align:center;">CẦU THỦ SÚT (5)</h4>
                 <ul id="st-list" class="player-list"></ul>
-                <p id="counter" style="text-align: center; color: #3498db; margin: 5px 0;">Đã chọn: 0/5</p>
+                <p id="counter" style="text-align:center; margin:2px; font-size:12px;">Đã chọn: 0/5</p>
             </div>
         </div>
-        <button id="start-btn" onclick="startGame()" disabled>VÀO TRẬN ĐẤU</button>
+        <button id="start-btn" onclick="startGame()" disabled>RA SÂN</button>
     </div>
 
     <div id="summary" class="overlay" style="display: none;">
-        <h1 style="color: #f1c40f;">TỔNG KẾT</h1>
-        <div id="rank-info" style="font-size: 22px; text-align: center; margin: 20px 0;"></div>
+        <h1 style="color:#f1c40f;">KẾT THÚC</h1>
+        <div id="rank-info" style="text-align:center; font-size: 20px;"></div>
         <button onclick="location.reload()">CHƠI LẠI</button>
     </div>
 
@@ -73,36 +68,27 @@ const stsData = ["Hồ Định (99)", "Chánh Tín (19)", "Tiến Sĩ (08)", "V�
 
 let selectedGK = "", selectedStrikers = [], currentTurn = 0, score = 0, gameState = 'WAIT';
 let aimPos = { x: 450, y: 150 };
-let ball = { x: 450, y: 520, r: 14, vx: 0, vy: 0, s: 1, trail: [] };
+let ball = { x: 450, y: 520, r: 15, vx: 0, vy: 0, s: 1, trail: [] };
 let gk = { x: 450, y: 175, dx: 0, dy: 0, state: 'IDLE' };
 let strikerAnim = { state: 'IDLE' };
 let feedback = { text: "", opacity: 0, color: "" };
-let lastClickTime = 0;
+let clickCount = 0, lastClickTime = 0;
 
 function initLists() {
     const gkUl = document.getElementById('gk-list');
     gksData.forEach(name => {
         const li = document.createElement('li'); li.className = 'player-item'; li.innerText = name;
-        li.onclick = () => {
-            document.querySelectorAll('#gk-list .player-item').forEach(el => el.classList.remove('selected'));
-            li.classList.add('selected'); selectedGK = name; checkReady();
-        };
+        li.onclick = () => { document.querySelectorAll('#gk-list .player-item').forEach(e=>e.classList.remove('selected')); li.classList.add('selected'); selectedGK = name; check(); };
         gkUl.appendChild(li);
     });
     const stUl = document.getElementById('st-list');
     stsData.forEach(name => {
         const li = document.createElement('li'); li.className = 'player-item'; li.innerText = name;
-        li.onclick = () => {
-            if(!selectedStrikers.includes(name) && selectedStrikers.length < 5) {
-                selectedStrikers.push(name); li.classList.add('selected');
-                document.getElementById('counter').innerText = `Đã chọn: ${selectedStrikers.length}/5`;
-                checkReady();
-            }
-        };
+        li.onclick = () => { if(selectedStrikers.length < 5 && !selectedStrikers.includes(name)){ selectedStrikers.push(name); li.classList.add('selected'); document.getElementById('counter').innerText = `Đã chọn: ${selectedStrikers.length}/5`; check(); } };
         stUl.appendChild(li);
     });
 }
-function checkReady() { document.getElementById('start-btn').disabled = !(selectedGK && selectedStrikers.length === 5); }
+function check() { document.getElementById('start-btn').disabled = !(selectedGK && selectedStrikers.length === 5); }
 
 function drawPerson(x, y, color, label, isGK, dive = {x:0, y:0}, state = 'IDLE') {
     ctx.save();
@@ -112,54 +98,56 @@ function drawPerson(x, y, color, label, isGK, dive = {x:0, y:0}, state = 'IDLE')
     if(state === 'RIGHT') ctx.rotate(Math.PI/4.5);
     
     ctx.fillStyle = "#111"; ctx.fillRect(-15, -85, 30, 12);
-    ctx.fillStyle = "#ffdbac"; ctx.beginPath(); ctx.arc(0, -68, 16, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = color; ctx.fillRect(-24, -53, 48, 55);
-    ctx.fillStyle = "white"; ctx.font = "bold 18px Arial"; ctx.textAlign = "center";
-    ctx.fillText(label.match(/\d+/)[0], 0, -20);
-    ctx.strokeStyle = "#ffdbac"; ctx.lineWidth = 9; ctx.beginPath();
-    let armY = (isGK && state !== 'IDLE') ? -100 : -20;
-    ctx.moveTo(-24, -45); ctx.lineTo(-38, armY); ctx.moveTo(24, -45); ctx.lineTo(38, armY); ctx.stroke();
+    ctx.fillStyle = "#ffdbac"; ctx.beginPath(); ctx.arc(0, -68, 18, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = color; ctx.fillRect(-25, -50, 50, 60);
+    ctx.fillStyle = "white"; ctx.font = "bold 20px Arial"; ctx.textAlign = "center";
+    ctx.fillText(label.match(/\d+/)[0], 0, -15);
+    
+    ctx.strokeStyle = "#ffdbac"; ctx.lineWidth = 10; ctx.beginPath();
+    let armY = (isGK && state !== 'IDLE') ? -110 : -20;
+    ctx.moveTo(-25, -40); ctx.lineTo(-40, armY); ctx.moveTo(25, -40); ctx.lineTo(40, armY); ctx.stroke();
+    
     if (!isGK && state === 'KICK') {
-        ctx.fillStyle = "#111"; ctx.fillRect(-18, 2, 12, 22); ctx.save(); ctx.translate(10, 2); ctx.rotate(-Math.PI/2.5); ctx.fillRect(0, 0, 12, 25); ctx.restore();
-    } else { ctx.fillStyle = "#111"; ctx.fillRect(-18, 2, 12, 22); ctx.fillRect(6, 2, 12, 22); }
+        ctx.fillStyle = "#111"; ctx.fillRect(-20, 10, 15, 25);
+        ctx.save(); ctx.translate(12, 10); ctx.rotate(-Math.PI/2.5); ctx.fillRect(0, 0, 15, 30); ctx.restore();
+    } else { ctx.fillStyle = "#111"; ctx.fillRect(-20, 10, 15, 25); ctx.fillRect(5, 10, 15, 25); }
     ctx.restore();
-    ctx.save(); ctx.translate(x + dive.x, y + dive.y); ctx.fillStyle = "white"; ctx.font = "bold 15px Arial"; ctx.textAlign = "center";
-    ctx.fillText(label.split('(')[0].trim(), 0, 60); ctx.restore();
+    ctx.save(); ctx.translate(x + dive.x, y + dive.y); ctx.fillStyle = "white"; ctx.font = "bold 16px Arial"; ctx.textAlign = "center";
+    ctx.fillText(label.split('(')[0].trim(), 0, 65); ctx.restore();
 }
 
 function update() {
     if(gameState !== 'PLAYING') return;
     ctx.clearRect(0, 0, 900, 600);
-    // Vẽ sân
     for(let i=0; i<600; i+=60) { ctx.fillStyle = (i/60)%2===0 ? "#1b5e20" : "#237029"; ctx.fillRect(0, i, 900, 60); }
     ctx.strokeStyle = "white"; ctx.lineWidth = 6;
     ctx.strokeRect(250, 50, 400, 150); ctx.strokeRect(100, 50, 700, 300);
     ctx.beginPath(); ctx.arc(450, 350, 100, 0, Math.PI, false); ctx.stroke();
-    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(450, 520, 7, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(450, 520, 8, 0, Math.PI*2); ctx.fill();
 
     if(ball.vy === 0) {
         ctx.beginPath(); ctx.setLineDash([10, 10]); ctx.strokeStyle = "rgba(255,255,0,0.8)";
         ctx.moveTo(ball.x, ball.y); ctx.lineTo(aimPos.x, aimPos.y); ctx.stroke(); ctx.setLineDash([]);
-        ctx.beginPath(); ctx.lineWidth = 3; ctx.strokeStyle="#f1c40f"; ctx.arc(aimPos.x, aimPos.y, 20, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.lineWidth = 3; ctx.strokeStyle="#f1c40f"; ctx.arc(aimPos.x, aimPos.y, 18, 0, Math.PI*2); ctx.stroke();
     }
 
-    drawPerson(550, 510, "#e74c3c", selectedStrikers[currentTurn], false, {x:0, y:0}, strikerAnim.state);
+    drawPerson(550, 500, "#e74c3c", selectedStrikers[currentTurn], false, {x:0, y:0}, strikerAnim.state);
     drawPerson(gk.x, 175, "#f1c40f", selectedGK, true, {x: gk.dx, y: gk.dy}, gk.state);
 
     if(ball.vy !== 0) {
-        ball.trail.push({x: ball.x, y: ball.y}); if(ball.trail.length > 8) ball.trail.shift();
+        ball.trail.push({x: ball.x, y: ball.y}); if(ball.trail.length > 7) ball.trail.shift();
         ball.x += ball.vx; ball.y += ball.vy;
         ball.s -= 0.0075; if(ball.s < 0.55) ball.s = 0.55;
-        if(gk.state === 'LEFT') gk.dx -= 8; if(gk.state === 'RIGHT') gk.dx += 8;
+        if(gk.state === 'LEFT') gk.dx -= 9; if(gk.state === 'RIGHT') gk.dx += 9;
         if(ball.y < 200) checkScore();
     }
+
     ball.trail.forEach((t, i) => { ctx.beginPath(); ctx.fillStyle = `rgba(255,255,255,${i/12})`; ctx.arc(t.x, t.y, ball.r * ball.s, 0, Math.PI*2); ctx.fill(); });
-    ctx.save(); ctx.translate(ball.x, ball.y); ctx.scale(ball.s, ball.s); ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(0,0, ball.r, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = "black"; ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.translate(ball.x, ball.y); ctx.scale(ball.s, ball.s); ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(0, 0, ball.r, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = "black"; ctx.stroke(); ctx.restore();
 
     if(feedback.opacity > 0) {
         ctx.save(); ctx.globalAlpha = feedback.opacity; ctx.fillStyle = feedback.color;
-        ctx.font = "bold 90px Arial"; ctx.textAlign="center"; ctx.fillText(feedback.text, 450, 320);
-        feedback.opacity -= 0.015; ctx.restore();
+        ctx.font = "bold 90px Arial"; ctx.textAlign="center"; ctx.fillText(feedback.text, 450, 320); feedback.opacity -= 0.015; ctx.restore();
     }
     requestAnimationFrame(update);
 }
@@ -170,34 +158,42 @@ function checkScore() {
     let inGoal = ball.x > 250 && ball.x < 650 && ball.y > 50;
     if(inGoal && !caught) { score++; feedback = {text: "VÀOOO!", color: "#2ecc71", opacity: 1}; }
     else { feedback = {text: "KHÔNG VÀO!", color: "#e74c3c", opacity: 1}; }
-    document.getElementById('hud-score').innerText = `Bàn thắng: ${score}`;
+    document.getElementById('hud-score').innerText = `Vào: ${score}`;
     setTimeout(() => {
-        if(currentTurn < 4) { currentTurn++; ball = { x: 450, y: 520, r: 14, vx: 0, vy: 0, s: 1, trail: [] }; gk = { x: 450, y: 175, dx: 0, dy: 0, state: 'IDLE' }; feedback.opacity = 0; document.getElementById('hud-turn').innerText = `Lượt sút: ${currentTurn + 1}/5`; }
+        if(currentTurn < 4) { currentTurn++; ball = { x: 450, y: 520, r: 15, vx: 0, vy: 0, s: 1, trail: [] }; gk = { x: 450, y: 175, dx: 0, dy: 0, state: 'IDLE' }; feedback.opacity = 0; document.getElementById('hud-turn').innerText = `Lượt: ${currentTurn + 1}/5`; }
         else { gameState = 'END'; document.getElementById('summary').style.display = 'flex'; document.getElementById('rank-info').innerHTML = `<h3>Thủ môn: ${selectedGK}</h3><h2>Kết quả: ${score}/5</h2>`; }
-    }, 1800);
+    }, 1700);
 }
 
+// XỬ LÝ ĐIỀU KHIỂN CHỐNG LỖI TRÊN ZALO
 function handleInput(e) {
     if(gameState !== 'PLAYING' || ball.vy !== 0) return;
+    e.preventDefault();
+    
     const rect = canvas.getBoundingClientRect();
-    const clientX = (e.touches ? e.touches[0].clientX : e.clientX);
-    const clientY = (e.touches ? e.touches[0].clientY : e.clientY);
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
     const inputX = (clientX - rect.left) * (canvas.width / rect.width);
     const inputY = (clientY - rect.top) * (canvas.height / rect.height);
     
-    let currentTime = new Date().getTime();
-    if (currentTime - lastClickTime < 350 && currentTime - lastClickTime > 0) {
+    let now = Date.now();
+    if (now - lastClickTime < 350) {
+        // DOUBLE CLICK: SÚT
         strikerAnim.state = 'KICK';
         setTimeout(() => {
             const dx = aimPos.x - ball.x, dy = aimPos.y - ball.y, dist = Math.sqrt(dx*dx + dy*dy);
-            ball.vx = (dx/dist) * 17; ball.vy = (dy/dist) * 17;
+            ball.vx = (dx/dist) * 17.5; ball.vy = (dy/dist) * 17.5;
             const r = Math.random(); gk.state = r < 0.38 ? 'LEFT' : (r < 0.76 ? 'RIGHT' : 'IDLE');
         }, 120);
-    } else { aimPos.x = inputX; aimPos.y = inputY; }
-    lastClickTime = currentTime;
+    } else {
+        // SINGLE CLICK: NGẮM
+        aimPos.x = inputX; aimPos.y = inputY;
+    }
+    lastClickTime = now;
 }
 
-canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(e); }, {passive: false});
+canvas.addEventListener('touchstart', handleInput, {passive: false});
 canvas.addEventListener('mousedown', handleInput);
 
 function startGame() { document.getElementById('intro').style.display = 'none'; gameState = 'PLAYING'; update(); }

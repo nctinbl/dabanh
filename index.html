@@ -3,24 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FC-Chuyên Bạc Liêu - Full List Fix</title>
+    <title>FC-Chuyên Bạc Liêu - Mr Tín Edition</title>
     <style>
         body { margin: 0; background: #000; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
         #game-container { position: relative; width: 100vw; max-width: 900px; aspect-ratio: 3/2; border: 2px solid #fff; background: #1b5e20; }
         canvas { display: block; width: 100%; height: 100%; touch-action: none; }
         
-        /* Overlay UI - Fix danh sách */
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.97); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; z-index: 100; padding: 5px; box-sizing: border-box; }
-        .game-title { color: #f1c40f; font-size: 22px; margin: 5px 0 0 0; text-shadow: 2px 2px #c0392b; }
+        .game-title { color: #f1c40f; font-size: 24px; margin: 5px 0 0 0; text-shadow: 2px 2px #c0392b; }
+        .credit { color: #fff; font-size: 16px; margin: 2px 0; font-weight: bold; font-style: italic; color: #3498db; }
         
-        .selection-area { display: flex; gap: 10px; width: 98%; height: 60%; margin-top: 5px; }
+        .selection-area { display: flex; gap: 10px; width: 98%; height: 62%; margin-top: 5px; }
         .list-container { background: #1a1a1a; padding: 5px; border-radius: 8px; width: 50%; border: 1px solid #444; display: flex; flex-direction: column; overflow: hidden; }
         .list-container h4 { margin: 2px 0; color:#f1c40f; text-align:center; font-size: 14px; }
         
-        /* Fix cuộn danh sách mượt trên điện thoại */
         .player-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; border: 1px solid #333; background: #000; -webkit-overflow-scrolling: touch; }
-        .player-item { padding: 12px 8px; border-bottom: 1px solid #222; cursor: pointer; font-size: 13px; line-height: 1.2; }
-        .selected { background: #27ae60 !important; font-weight: bold; color: white; }
+        .player-item { padding: 12px 8px; border-bottom: 1px solid #222; cursor: pointer; font-size: 13px; }
+        .selected { background: #27ae60 !important; font-weight: bold; }
         
         .how-to-play { background: rgba(241, 196, 15, 0.1); padding: 5px; border-radius: 5px; margin: 5px; font-size: 11px; border: 1px solid #f1c40f; width: 95%; text-align: center; }
         button { padding: 10px 40px; font-size: 18px; background: #c0392b; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; margin: 5px 0; }
@@ -39,7 +38,8 @@
 
     <div id="intro" class="overlay">
         <h2 class="game-title">GAME SÚT PHẠT ĐỀN</h2>
-        <h4 style="margin:2px;">FC-CHUYÊN BẠC LIÊU</h4>
+        <h3 style="margin:2px;">FC-CHUYÊN BẠC LIÊU</h3>
+        <div class="credit">Người viết: Mr Tín</div>
         
         <div class="selection-area">
             <div class="list-container">
@@ -53,12 +53,13 @@
         </div>
         <p id="counter" style="margin: 2px; font-size: 12px; color: #3498db;">Đã chọn: 0/5</p>
         <div class="how-to-play">Chạm 1 lần để NGẮM • Chạm 2 lần nhanh để SÚT</div>
-        <button id="start-btn" onclick="startGame()" disabled>BẮT ĐẦU</button>
+        <button id="start-btn" onclick="startGame()" disabled>VÀO TRẬN</button>
     </div>
 
     <div id="summary" class="overlay" style="display: none; justify-content: center;">
         <h1 style="color:#f1c40f;">KẾT THÚC</h1>
         <div id="rank-info" style="text-align:center; font-size: 18px;"></div>
+        <p class="credit">Tác giả: Mr Tín</p>
         <button onclick="location.reload()">CHƠI LẠI</button>
     </div>
 
@@ -108,7 +109,7 @@ function drawPerson(x, y, color, label, isGK, dive = {x:0, y:0}, state = 'IDLE')
     ctx.fillStyle = "white"; ctx.font = "bold 20px Arial"; ctx.textAlign = "center";
     ctx.fillText(label.match(/\d+/)[0], 0, -15);
     ctx.strokeStyle = "#ffdbac"; ctx.lineWidth = 10; ctx.beginPath();
-    let armY = (isGK && state !== 'IDLE') ? -100 : -20;
+    let armY = (isGK && state !== 'IDLE') ? -110 : -20;
     ctx.moveTo(-25, -40); ctx.lineTo(-40, armY); ctx.moveTo(25, -40); ctx.lineTo(40, armY); ctx.stroke();
     if (!isGK && state === 'KICK') {
         ctx.fillStyle = "#111"; ctx.fillRect(-20, 10, 15, 25);

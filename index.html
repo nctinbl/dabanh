@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>FC-Chuyên Bạc Liêu - Ultimate Fixed</title>
+    <style>
+        body { margin: 0; background: #050505; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        #game-container { position: relative; width: 900px; height: 600px; border: 4px solid #fff; background: #1b5e20; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        canvas { display: block; }
+        
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        .selection-area { display: flex; gap: 30px; margin-top: 15px; }
+        .list-container { background: #222; padding: 15px; border-radius: 12px; width: 280px; border: 1px solid #444; }
+        .player-list { list-style: none; padding: 0; margin: 10px 0; max-height: 250px; overflow-y: auto; border: 1px solid #333; }
+        .player-item { padding: 10px; border-bottom: 1px solid #333; cursor: pointer; transition: 0.2s; font-size: 14px; text-align: left; }
+        .player-item:hover { background: #333; color: #f1c40f; }
+        .selected { background: #27ae60 !important; font-weight: bold; }
+        
+        button { padding: 15px 50px; font-size: 18px; background: #c0392b; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; margin-top: 20px; transition: 0.3s; }
+        button:hover:not(:disabled) { transform: scale(1.05); background: #e74c3c; }
+        button:disabled { background: #555; cursor: not-allowed; opacity: 0.5; }
+        
+        #hud { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-around; font-size: 24px; font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none; z-index: 10; }
+        .game-title-main { color: #f1c40f; font-size: 50px; margin: 0; text-shadow: 3px 3px #c0392b; letter-spacing: 2px; }
+        .sub-title { color: #fff; font-size: 24px; margin: 5px 0; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="hud">
+        <div id="hud-turn">Lượt sút: 0/5</div>
+        <div id="hud-score">Bàn thắng: 0</div>
+    </div>
+
+    <div id="intro" class="overlay">
+        <h2 class="game-title-main">GAME SÚT PHẠT ĐỀN</h2>
+        <h1 class="sub-title">FC-CHUYÊN BẠC LIÊU</h1>
+        <p style="margin: 2px; color: #aaa;">Người viết: Thầy Tín</p>
+        
+        <div class="selection-area">
+            <div class="list-container">
+                <h3 style="color: #f1c40f; margin: 5px;">Thủ môn (Chọn 1)</h3>
+                <ul id="gk-list" class="player-list"></ul>
+            </div>
+            <div class="list-container">
+                <h3 style="color: #3498db; margin: 5px;">Cầu thủ sút (Chọn 5)</h3>
+                <ul id="st-list" class="player-list"></ul>
+                <p id="counter" style="margin: 5px; color: #3498db;">Đã chọn: 0/5</p>
+            </div>
+        </div>
+        <button id="start-btn" onclick="startGame()" disabled>VÀO TRẬN ĐẤU</button>
+    </div>
+
+    <div id="summary" class="overlay" style="display: none;">
+        <h1 style="color: #f1c40f;">TỔNG KẾT TRẬN ĐẤU</h1>
+        <div id="rank-info" style="font-size: 22px; text-align: center;"></div>
+        <button onclick="location.reload()">CHƠI LẠI</button>
+    </div>
+
+    <canvas id="gameCanvas" width="900" height="600"></canvas>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const gksData = ["Phi Phi (01)", "Filip Nguyễn (21)", "Văn Lượm (02)", "Tấn Phát (20)"];
+const stsData = ["Hồ Định (99)", "Chánh Tín (19)", "Tiến Sĩ (08)", "Vĩnh Vĩnh (10)", "Mạnh Cường (04)", "Minh Chí (07)", "Thanh Thái (09)", "Khánh Hiến (101)", "Thanh Hùng (05)"];
+
+let selectedGK = "", selectedStrikers = [], currentTurn = 0, score = 0, gameState = 'WAIT';
+let mouse = { x: 450, y: 300 };
+let ball = { x: 450, y: 520, r: 13, vx: 0, vy: 0, s: 1, trail: [] };
+let gk = { x: 450, y: 175, dx: 0, dy: 0, state: 'IDLE' };
+let strikerAnim = { state: 'IDLE' };
+let feedback = { text: "", opacity: 0, color: "" };
+
+function initLists() {
+    const gkUl = document.getElementById('gk-list');
+    gksData.forEach(name => {
+        const li = document.createElement('li'); li.className = 'player-item'; li.innerText = name;
+        li.onclick = () => {
+            document.querySelectorAll('#gk-list .player-item').forEach(el => el.classList.remove('selected'));
+            li.classList.add('selected'); selectedGK = name; checkReady();
+        };
+        gkUl.appendChild(li);
+    });
+    const stUl = document.getElementById('st-list');
+    stsData.forEach(name => {
+        const li = document.createElement('li'); li.className = 'player-item'; li.innerText = name;
+        li.onclick = () => {
+            if(!selectedStrikers.includes(name) && selectedStrikers.length < 5) {
+                selectedStrikers.push(name); li.classList.add('selected');
+                document.getElementById('counter').innerText = `Đã chọn: ${selectedStrikers.length}/5`;
+                checkReady();
+            }
+        };
+        stUl.appendChild(li);
+    });
+}
+function checkReady() { document.getElementById('start-btn').disabled = !(selectedGK && selectedStrikers.length === 5); }
+
+function drawField() {
+    // Vẽ cỏ sọc
+    for(let i=0; i<600; i+=60) {
+        ctx.fillStyle = (i/60)%2 === 0 ? "#1b5e20" : "#237029";
+        ctx.fillRect(0, i, 900, 60);
+    }
+    ctx.strokeStyle = "white"; ctx.lineWidth = 6;
+    ctx.strokeRect(250, 50, 400, 150); // Khung thành
+    ctx.strokeRect(100, 50, 700, 300); // Vòng cấm
+    
+    // Vòng cung 11m50
+    ctx.beginPath();
+    ctx.arc(450, 350, 100, 0, Math.PI, false);
+    ctx.stroke();
+    
+    // Chấm phạt đền
+    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(450, 520, 6, 0, Math.PI*2); ctx.fill();
+}
+
+function drawPerson(x, y, color, label, isGK, dive = {x:0, y:0}, state = 'IDLE') {
+    ctx.save();
+    let idleOff = (!isGK && state === 'IDLE') ? Math.sin(Date.now() / 150) * 4 : 0;
+    ctx.translate(x + dive.x, y + dive.y + idleOff);
+
+    if(state === 'LEFT') ctx.rotate(-Math.PI/4.5);
+    if(state === 'RIGHT') ctx.rotate(Math.PI/4.5);
+
+    // Tóc & Mặt
+    ctx.fillStyle = "#111"; ctx.fillRect(-15, -85, 30, 12);
+    ctx.fillStyle = "#ffdbac"; ctx.beginPath(); ctx.arc(0, -68, 15, 0, Math.PI*2); ctx.fill();
+    
+    // Áo & Số
+    ctx.fillStyle = color; ctx.fillRect(-22, -53, 44, 55);
+    ctx.fillStyle = "white"; ctx.font = "bold 18px Arial"; ctx.textAlign = "center";
+    let numStr = label.match(/\d+/);
+    let num = numStr ? numStr[0] : "0";
+    ctx.fillText(num, 0, -20);
+    
+    // Tay
+    ctx.strokeStyle = "#ffdbac"; ctx.lineWidth = 8; ctx.beginPath();
+    let armSwing = (!isGK && state === 'IDLE') ? Math.sin(Date.now() / 150) * 12 : 0;
+    let armY = (isGK && state !== 'IDLE') ? -100 : -20;
+    ctx.moveTo(-22, -45); ctx.lineTo(-35 - armSwing/2, armY + armSwing); 
+    ctx.moveTo(22, -45); ctx.lineTo(35 + armSwing/2, armY + armSwing); 
+    ctx.stroke();
+
+    // Chân
+    if (!isGK && state === 'KICK') {
+        ctx.fillStyle = "#111"; ctx.fillRect(-18, 2, 12, 22); 
+        ctx.save(); ctx.translate(10, 2); ctx.rotate(-Math.PI/2.5); ctx.fillRect(0, 0, 12, 25); ctx.restore();
+    } else {
+        ctx.fillStyle = "#111"; ctx.fillRect(-18, 2, 12, 22); ctx.fillRect(6, 2, 12, 22);
+    }
+    
+    ctx.restore();
+    // Tên (vẽ trực tiếp lên canvas tọa độ tĩnh để không bị mờ khi rotate)
+    ctx.save();
+    ctx.translate(x + dive.x, y + dive.y);
+    ctx.fillStyle = "white"; ctx.font = "bold 14px Arial"; ctx.textAlign = "center";
+    ctx.fillText(label.split('(')[0].trim(), 0, 55);
+    ctx.restore();
+}
+
+function update() {
+    if(gameState !== 'PLAYING') return;
+    
+    // Xóa sạch khung hình mỗi frame - Ngăn chặn mờ hình
+    ctx.clearRect(0, 0, 900, 600);
+    
+    drawField();
+
+    // Đường ngắm
+    if(ball.vy === 0) {
+        ctx.beginPath(); ctx.setLineDash([10, 10]); ctx.strokeStyle = "rgba(255,255,0,0.7)";
+        ctx.moveTo(ball.x, ball.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    drawPerson(540, 510, "#e74c3c", selectedStrikers[currentTurn], false, {x:0, y:0}, strikerAnim.state);
+    drawPerson(gk.x, 175, "#f1c40f", selectedGK, true, {x: gk.dx, y: gk.dy}, gk.state);
+
+    if(ball.vy !== 0) {
+        ball.trail.push({x: ball.x, y: ball.y});
+        if(ball.trail.length > 7) ball.trail.shift();
+        ball.x += ball.vx; ball.y += ball.vy;
+        ball.s -= 0.0075; if(ball.s < 0.5) ball.s = 0.5;
+        if(gk.state === 'LEFT') gk.dx -= 8; if(gk.state === 'RIGHT') gk.dx += 8;
+        if(ball.y < 200) checkScore();
+    }
+
+    // Vẽ vệt bóng
+    ball.trail.forEach((t, i) => {
+        ctx.beginPath(); ctx.fillStyle = `rgba(255,255,255,${i/12})`;
+        ctx.arc(t.x, t.y, ball.r * ball.s, 0, Math.PI*2); ctx.fill();
+    });
+
+    // Vẽ quả bóng
+    ctx.save(); ctx.translate(ball.x, ball.y); ctx.scale(ball.s, ball.s);
+    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(0, 0, ball.r, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = "black"; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+
+    // Hiển thị chữ
+    if(feedback.opacity > 0) {
+        ctx.save();
+        ctx.globalAlpha = feedback.opacity;
+        ctx.fillStyle = feedback.color;
+        ctx.font = "bold 90px Arial"; ctx.textAlign="center";
+        ctx.fillText(feedback.text, 450, 320); 
+        feedback.opacity -= 0.015;
+        ctx.restore();
+    }
+    requestAnimationFrame(update);
+}
+
+function checkScore() {
+    ball.vx = 0; ball.vy = 0;
+    strikerAnim.state = 'IDLE';
+    let caught = Math.abs(ball.x - (gk.x + gk.dx)) < 85; // Tăng hitbox bắt bóng do GK to hơn
+    let inGoal = ball.x > 250 && ball.x < 650 && ball.y > 50;
+    
+    if(inGoal && !caught) {
+        score++; feedback = {text: "VÀOOO!", color: "#2ecc71", opacity: 1};
+    } else {
+        feedback = {text: "KHÔNG VÀO!", color: "#e74c3c", opacity: 1};
+    }
+    document.getElementById('hud-score').innerText = `Bàn thắng: ${score}`;
+    
+    setTimeout(() => {
+        if(currentTurn < 4) {
+            currentTurn++;
+            resetBallState();
+            document.getElementById('hud-turn').innerText = `Lượt sút: ${currentTurn + 1}/5`;
+        } else {
+            gameState = 'END'; document.getElementById('summary').style.display = 'flex';
+            document.getElementById('rank-info').innerHTML = `<p>Thủ môn: <b>${selectedGK}</b></p><h2>Ghi bàn: ${score}/5</h2>`;
+        }
+    }, 1700);
+}
+
+function resetBallState() {
+    ball = { x: 450, y: 520, r: 13, vx: 0, vy: 0, s: 1, trail: [] };
+    gk = { x: 450, y: 175, dx: 0, dy: 0, state: 'IDLE' };
+    feedback.opacity = 0; // Reset thông báo cũ ngay lập tức
+}
+
+canvas.onmousemove = (e) => { const r = canvas.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; };
+canvas.onmousedown = () => {
+    if(gameState !== 'PLAYING' || ball.vy !== 0) return;
+    strikerAnim.state = 'KICK';
+    setTimeout(() => {
+        const dx = mouse.x - ball.x, dy = mouse.y - ball.y, dist = Math.sqrt(dx*dx + dy*dy);
+        ball.vx = (dx/dist) * 16.5; ball.vy = (dy/dist) * 16.5;
+        const r = Math.random(); gk.state = r < 0.38 ? 'LEFT' : (r < 0.76 ? 'RIGHT' : 'IDLE');
+    }, 120);
+};
+
+function startGame() { 
+    document.getElementById('intro').style.display = 'none'; 
+    gameState = 'PLAYING'; 
+    resetBallState();
+    update(); 
+}
+initLists();
+</script>
+</body>
+</html>

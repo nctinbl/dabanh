@@ -8,22 +8,26 @@
         body { margin: 0; background: #000; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
         #game-container { position: relative; width: 100vw; max-width: 900px; aspect-ratio: 3/2; border: 3px solid #fff; background: #1b5e20; }
         canvas { display: block; width: 100%; height: 100%; }
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 10px; box-sizing: border-box; }
-        .game-title { color: #f1c40f; font-size: 26px; margin: 0; text-shadow: 2px 2px #c0392b; }
         
-        /* Bảng hướng dẫn mới */
-        .manual-box { background: rgba(241, 196, 15, 0.15); border: 1px solid #f1c40f; border-radius: 8px; padding: 10px; width: 90%; margin: 8px 0; font-size: 13px; line-height: 1.4; text-align: center; }
-        .manual-box b { color: #f1c40f; }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; z-index: 100; padding: 5px; box-sizing: border-box; }
+        .game-title { color: #f1c40f; font-size: 22px; margin: 5px 0 0 0; text-shadow: 2px 2px #c0392b; }
+        .credit { color: #3498db; font-size: 14px; margin: 2px 0; font-weight: bold; }
 
-        .selection-area { display: flex; gap: 10px; width: 95%; height: 40%; margin-top: 5px; }
-        .list-container { background: #1a1a1a; padding: 5px; border-radius: 8px; width: 50%; border: 1px solid #444; display: flex; flex-direction: column; overflow: hidden; }
-        .player-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; background: #000; }
-        .player-item { padding: 10px; border-bottom: 1px solid #222; cursor: pointer; font-size: 13px; }
+        /* FIX: Tối ưu không gian danh sách */
+        .selection-area { display: flex; gap: 8px; width: 98%; height: 55%; margin-top: 5px; }
+        .list-container { background: #1a1a1a; padding: 4px; border-radius: 8px; width: 50%; border: 1px solid #444; display: flex; flex-direction: column; overflow: hidden; }
+        .list-container h4 { margin: 2px 0; color:#f1c40f; text-align:center; font-size: 13px; text-transform: uppercase; }
+        
+        .player-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; background: #000; -webkit-overflow-scrolling: touch; }
+        /* Rút gọn chiều cao mỗi cầu thủ để hiện nhiều hơn */
+        .player-item { padding: 8px 6px; border-bottom: 1px solid #222; cursor: pointer; font-size: 12px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .selected { background: #27ae60 !important; font-weight: bold; }
         
-        button { padding: 12px 40px; font-size: 18px; background: #c0392b; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-around; font-size: 20px; font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none; z-index: 10; }
-        .detail-row { display: flex; justify-content: space-between; width: 280px; border-bottom: 1px solid #444; padding: 5px 0; font-size: 14px; }
+        .manual-box { background: rgba(241, 196, 15, 0.1); border: 1px solid #f1c40f; border-radius: 6px; padding: 6px; width: 95%; margin: 5px 0; font-size: 11px; text-align: center; }
+        
+        button { padding: 10px 30px; font-size: 16px; background: #c0392b; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; margin: 5px 0; }
+        #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-around; font-size: 18px; font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none; z-index: 10; }
+        .detail-row { display: flex; justify-content: space-between; width: 280px; border-bottom: 1px solid #444; padding: 4px 0; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -36,27 +40,24 @@
 
     <div id="intro" class="overlay">
         <h2 class="game-title">GAME SÚT PHẠT ĐỀN</h2>
-        <h3 style="margin:2px;">FC-CHUYÊN BẠC LIÊU</h3>
-        <div style="font-style: italic; color: #3498db;">Người viết: Mr Tín</div>
+        <div class="credit">Người viết: Mr Tín</div>
         
         <div class="manual-box">
-            <b>CÁCH CHƠI:</b><br>
-            1. Chọn 1 Thủ môn & 5 Cầu thủ sút phạt.<br>
-            2. <b>Chạm 1 lần:</b> Để ngắm hướng (vòng tròn vàng).<br>
-            3. <b>Chạm 2 lần nhanh:</b> Để sút bóng vào lưới!
+            <b>CÁCH CHƠI:</b> Chạm 1 lần để <b>NGẮM</b> • Chạm 2 lần nhanh để <b>SÚT</b>
         </div>
 
         <div class="selection-area">
             <div class="list-container"><h4>THỦ MÔN</h4><ul id="gk-list" class="player-list"></ul></div>
             <div class="list-container"><h4>CẦU THỦ SÚT (5)</h4><ul id="st-list" class="player-list"></ul></div>
         </div>
-        <button id="start-btn" onclick="startGame()" disabled>VÀO TRẬN ĐẤU</button>
+        <p id="counter" style="margin: 2px; font-size: 11px; color: #3498db;">Đã chọn: 0/5</p>
+        <button id="start-btn" onclick="startGame()" disabled>VÀO TRẬN</button>
     </div>
 
-    <div id="summary" class="overlay" style="display: none;">
-        <h1 style="color:#f1c40f;">TỔNG KẾT CHI TIẾT</h1>
+    <div id="summary" class="overlay" style="display: none; justify-content: center;">
+        <h1 style="color:#f1c40f; margin: 10px 0;">KẾT THÚC</h1>
         <div id="stat-content"></div>
-        <button onclick="location.reload()" style="margin-top:15px;">CHƠI LẠI</button>
+        <button onclick="location.reload()" style="margin-top:10px;">CHƠI LẠI</button>
     </div>
 
     <canvas id="gameCanvas" width="900" height="600"></canvas>
@@ -89,7 +90,7 @@ function initLists() {
     const stUl = document.getElementById('st-list');
     stsData.forEach(name => {
         const li = document.createElement('li'); li.className='player-item'; li.innerText=name;
-        li.onclick = () => { if(selectedStrikers.length < 5 && !selectedStrikers.includes(name)){ selectedStrikers.push(name); li.classList.add('selected'); checkReady(); } };
+        li.onclick = () => { if(selectedStrikers.length < 5 && !selectedStrikers.includes(name)){ selectedStrikers.push(name); li.classList.add('selected'); document.getElementById('counter').innerText=`Đã chọn: ${selectedStrikers.length}/5`; checkReady(); } };
         stUl.appendChild(li);
     });
 }
@@ -123,8 +124,6 @@ function update() {
     if(gameState === 'INTRO' || gameState === 'SUMMARY') return;
     ctx.clearRect(0, 0, 900, 600);
     for(let i=0; i<600; i+=60) { ctx.fillStyle = (i/60)%2===0 ? "#1b5e20" : "#237029"; ctx.fillRect(0, i, 900, 60); }
-    
-    // Lưới
     ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 1;
     for(let i=250; i<=650; i+=20) {
         ctx.beginPath(); ctx.moveTo(i, 50); 
@@ -132,17 +131,14 @@ function update() {
         ctx.lineTo(i, 200 + stretch); ctx.stroke();
     }
     ctx.strokeStyle = "white"; ctx.lineWidth = 8; ctx.strokeRect(250, 50, 400, 150);
-
     if(ball.state === 'STILL') {
         ctx.beginPath(); ctx.setLineDash([10, 10]); ctx.strokeStyle = "rgba(255,255,0,0.6)";
         ctx.moveTo(ball.x, ball.y); ctx.lineTo(aimPos.x, aimPos.y); ctx.stroke(); ctx.setLineDash([]);
         ctx.beginPath(); ctx.lineWidth=2; ctx.strokeStyle="#f1c40f"; ctx.arc(aimPos.x, aimPos.y, 15, 0, Math.PI*2); ctx.stroke();
     }
-
     drawPerson(ref.x, ref.y, "#000", "", false, {x:0, y:0}, ref.state, true);
     drawPerson(550, 510, "#e74c3c", selectedStrikers[currentTurn], false, {x:0, y:0}, strikerAnim);
     drawPerson(gk.x, 175, "#f1c40f", selectedGK, true, {x: gk.dx, y: gk.dy}, gk.state);
-
     if(ball.state === 'FLYING' || ball.state === 'REBOUND' || ball.state === 'IN_NET') {
         ball.x += ball.vx; ball.y += ball.vy;
         if(ball.state === 'FLYING') {
@@ -155,11 +151,9 @@ function update() {
             } else if(ball.y < 50 || ball.x < 100 || ball.x > 800) { ball.state = 'REBOUND'; finishTurn(false); }
         }
     }
-
     ctx.save(); ctx.translate(ball.x, ball.y); ctx.scale(ball.s, ball.s);
     ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(0, 0, ball.r, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = "black"; ctx.stroke(); ctx.restore();
-
     if(fb.opacity > 0) {
         ctx.save(); ctx.globalAlpha = fb.opacity; ctx.fillStyle = fb.color;
         ctx.font = `bold ${80 * fb.s}px Arial`; ctx.textAlign="center";
@@ -176,18 +170,15 @@ function finishTurn(isGoal) {
     document.getElementById('hud-score').innerText = `Vào: ${score}`;
     setTimeout(() => {
         currentTurn++;
-        if(currentTurn < 5) {
-            resetField();
-            document.getElementById('hud-turn').innerText = `Lượt: ${currentTurn + 1}/5`;
-        } else { showSummary(); }
+        if(currentTurn < 5) { resetField(); document.getElementById('hud-turn').innerText = `Lượt: ${currentTurn + 1}/5`; }
+        else { showSummary(); }
     }, 2000);
 }
 
 function resetField() {
     ball = { x: 450, y: 520, r: 15, vx: 0, vy: 0, s: 1, state: 'STILL' };
     gk = { x: 450, y: 175, dx: 0, dy: 0, state: 'IDLE' };
-    ref.state = 'IDLE'; strikerAnim = 'IDLE'; netStretch = 0; fb.opacity = 0;
-    turnLock = false;
+    ref.state = 'IDLE'; strikerAnim = 'IDLE'; netStretch = 0; fb.opacity = 0; turnLock = false;
 }
 
 function handleInput(e) {
@@ -201,10 +192,8 @@ function handleInput(e) {
     if (now - lastClickTime < 350) {
         strikerAnim = 'KICK'; ref.state = 'WHISTLE';
         setTimeout(() => {
-            const dx = aimPos.x - ball.x, dy = aimPos.y - ball.y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            ball.vx = (dx/dist) * 19; ball.vy = (dy/dist) * 19;
-            ball.state = 'FLYING';
+            const dx = aimPos.x - ball.x, dy = aimPos.y - ball.y, dist = Math.sqrt(dx*dx + dy*dy);
+            ball.vx = (dx/dist) * 19.5; ball.vy = (dy/dist) * 19.5; ball.state = 'FLYING';
             const r = Math.random(); gk.state = r < 0.4 ? 'LEFT' : (r < 0.8 ? 'RIGHT' : 'IDLE');
         }, 150);
     } else { aimPos.x = inputX; aimPos.y = inputY; }
@@ -217,7 +206,7 @@ function showSummary() {
     shotResults.forEach((s, i) => {
         html += `<div class="detail-row"><span>${i+1}. ${s.n}</span><b style="color:${s.r==='VÀO'?'#2ecc71':'#e74c3c'}">${s.r}</b></div>`;
     });
-    html += `<h2 style="color:#f1c40f">TỔNG: ${score}/5</h2><p style="font-style:italic">Tác giả: Mr Tín</p>`;
+    html += `<h2 style="color:#f1c40f">TỔNG: ${score}/5</h2>`;
     document.getElementById('stat-content').innerHTML = html;
 }
 
